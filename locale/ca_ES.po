@@ -1,0 +1,50 @@
+#
+msgid ""
+msgstr "Content-Type: text/plain; charset=utf-8\n"
+
+msgctxt "field:sale.add_products.select_products,id:"
+msgid "ID"
+msgstr "Identificador"
+
+msgctxt "field:sale.add_products.select_products,ignored_sales:"
+msgid "Ignored Sales"
+msgstr "Vendes ingorades"
+
+msgctxt "field:sale.add_products.select_products,products:"
+msgid "Products"
+msgstr "Productes"
+
+msgctxt "field:sale.add_products.select_products,selected_sales:"
+msgid "Selected Sales"
+msgstr "Vendes seleccionades"
+
+msgctxt "help:sale.add_products.select_products,ignored_sales:"
+msgid ""
+"The sales that won't be changed because they are not in a state that allows "
+"it."
+msgstr ""
+"Les vendes que no es modificaràn perquè no estan en un estat que ho permeti."
+
+msgctxt "model:ir.action,name:wizard_add_products"
+msgid "Add products"
+msgstr "Afegeix productes"
+
+msgctxt "model:sale.add_products.select_products,name:"
+msgid "Add Products to Sale: Select products"
+msgstr "Afegeix productes a vendes: Selecciona productes"
+
+msgctxt "view:sale.add_products.select_products:"
+msgid "Choose the products that will be added in the selected sales"
+msgstr "Escull els productes que s'afegiran a les vendes seleccionades"
+
+msgctxt "view:sale.add_products.select_products:"
+msgid "Select products to add"
+msgstr "Productes seleccionats a afegir"
+
+msgctxt "wizard_button:sale.add_products,select_products,add_products:"
+msgid "Add"
+msgstr "Afegeix"
+
+msgctxt "wizard_button:sale.add_products,select_products,end:"
+msgid "Cancel"
+msgstr "Cancel·la"
