@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!-- The COPYRIGHT file at the top level of this repository contains the full
+     copyright notices and license terms. -->
+<form string="Select products to add" col="4">
+    <image name="tryton-dialog-information" xexpand="0" xfill="0"/>
+    <label string="Choose the products that will be added in the selected sales"
+        id="choose" yalign="0.0" xalign="0.0" xexpand="1" colspan="3"/>
+    <label name="selected_sales"/>
+    <field name="selected_sales"/>
+    <label name="ignored_sales"/>
+    <field name="ignored_sales"/>
+    <newline/>
+    <field name="products" colspan="4"/>
+</form>

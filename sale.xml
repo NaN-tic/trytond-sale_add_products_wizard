@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<!-- The COPYRIGHT file at the top level of this repository contains the full
+     copyright notices and license terms. -->
+<tryton>
+    <data>
+        <record model="ir.ui.view" id="add_products_select_products_view_form">
+            <field name="model">sale.add_products.select_products</field>
+            <field name="type">form</field>
+            <field name="name">add_products_select_products_form</field>
+        </record>
+
+        <record model="ir.action.wizard" id="wizard_add_products">
+            <field name="name">Add products</field>
+            <field name="wiz_name">sale.add_products</field>
+            <field name="model">sale.sale</field>
+        </record>
+        <record model="ir.action.keyword" id="act_wizard_add_products_keyword">
+            <field name="keyword">form_action</field>
+            <field name="model">sale.sale,-1</field>
+            <field name="action" ref="wizard_add_products"/>
+        </record>
+    </data>
+</tryton>
