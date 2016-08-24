@@ -96,16 +96,8 @@ class AddProducts(Wizard):
                         else:
                             setattr(line, fname, None)
 
-                line_vals = line._save_values
-                line_vals.update(line.on_change_product())
-                for fname in line_vals.keys():
-                    if fname.endswith('.rec_name'):
-                        del line_vals[fname]
-                        continue
-                    if (isinstance(getattr(SaleLine, fname), fields.Many2Many)
-                            and line_vals[fname]):
-                        line_vals[fname] = [('add', line_vals[fname])]
-                to_create.append(line_vals)
+                line.on_change_product()
+                to_create.append(line)
         if to_create:
-            SaleLine.create(to_create)
+            SaleLine.save(to_create)
         return 'end'
