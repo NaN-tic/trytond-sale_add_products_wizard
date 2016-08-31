@@ -9,6 +9,12 @@ Imports::
     >>> from decimal import Decimal
     >>> from operator import attrgetter
     >>> from proteus import config, Model, Wizard
+    >>> from trytond.modules.company.tests.tools import create_company, \
+    ...     get_company
+    >>> from trytond.modules.account.tests.tools import create_fiscalyear, \
+    ...     create_chart, get_accounts, create_tax, set_tax_code
+    >>> from trytond.modules.account_invoice.tests.tools import \
+    ...     set_fiscalyear_invoice_sequences, create_payment_term
     >>> today = datetime.date.today()
 
 Create database::
@@ -16,38 +22,18 @@ Create database::
     >>> config = config.set_trytond()
     >>> config.pool.test = True
 
-Install sale::
+Install sale_add_products_wizard::
 
-    >>> Module = Model.get('ir.module.module')
+    >>> Module = Model.get('ir.module')
     >>> module, = Module.find([('name', '=', 'sale_add_products_wizard')])
     >>> Module.install([module.id], config.context)
-    >>> Wizard('ir.module.module.install_upgrade').execute('upgrade')
+    >>> Wizard('ir.module.install_upgrade').execute('upgrade')
 
 Create company::
 
-    >>> Currency = Model.get('currency.currency')
-    >>> CurrencyRate = Model.get('currency.currency.rate')
-    >>> currencies = Currency.find([('code', '=', 'USD')])
-    >>> if not currencies:
-    ...     currency = Currency(name='U.S. Dollar', symbol='$', code='USD',
-    ...         rounding=Decimal('0.01'), mon_grouping='[3, 3, 0]',
-    ...         mon_decimal_point='.', mon_thousands_sep=',')
-    ...     currency.save()
-    ...     CurrencyRate(date=today + relativedelta(month=1, day=1),
-    ...         rate=Decimal('1.0'), currency=currency).save()
-    ... else:
-    ...     currency, = currencies
-    >>> Company = Model.get('company.company')
-    >>> Party = Model.get('party.party')
-    >>> company_config = Wizard('company.company.config')
-    >>> company_config.execute('company')
-    >>> company = company_config.form
-    >>> party = Party(name='Dunder Mifflin')
-    >>> party.save()
-    >>> company.party = party
-    >>> company.currency = currency
-    >>> company_config.execute('add')
-    >>> company, = Company.find([])
+    >>> _ = create_company()
+    >>> company = get_company()
+    >>> party = company.party
 
 Reload the context::
 
@@ -67,65 +53,28 @@ Create sale user::
 
 Create fiscal year::
 
-    >>> FiscalYear = Model.get('account.fiscalyear')
-    >>> Sequence = Model.get('ir.sequence')
-    >>> SequenceStrict = Model.get('ir.sequence.strict')
-    >>> fiscalyear = FiscalYear(name=str(today.year))
-    >>> fiscalyear.start_date = today + relativedelta(month=1, day=1)
-    >>> fiscalyear.end_date = today + relativedelta(month=12, day=31)
-    >>> fiscalyear.company = company
-    >>> post_move_seq = Sequence(name=str(today.year), code='account.move',
-    ...     company=company)
-    >>> post_move_seq.save()
-    >>> fiscalyear.post_move_sequence = post_move_seq
-    >>> invoice_seq = SequenceStrict(name=str(today.year),
-    ...     code='account.invoice', company=company)
-    >>> invoice_seq.save()
-    >>> fiscalyear.out_invoice_sequence = invoice_seq
-    >>> fiscalyear.in_invoice_sequence = invoice_seq
-    >>> fiscalyear.out_credit_note_sequence = invoice_seq
-    >>> fiscalyear.in_credit_note_sequence = invoice_seq
-    >>> fiscalyear.save()
-    >>> FiscalYear.create_period([fiscalyear.id], config.context)
+    >>> fiscalyear = set_fiscalyear_invoice_sequences(
+    ...     create_fiscalyear(company))
+    >>> fiscalyear.click('create_period')
+    >>> period = fiscalyear.periods[0]
 
 Create chart of accounts::
 
-    >>> AccountTemplate = Model.get('account.account.template')
-    >>> Account = Model.get('account.account')
+    >>> _ = create_chart(company)
+    >>> accounts = get_accounts(company)
+    >>> receivable = accounts['receivable']
+    >>> payable = accounts['payable']
+    >>> revenue = accounts['revenue']
+    >>> expense = accounts['expense']
+    >>> account_tax = accounts['tax']
+    >>> account_cash = accounts['cash']
+
+Create journals::
+
     >>> Journal = Model.get('account.journal')
-    >>> account_template, = AccountTemplate.find([('parent', '=', None)])
-    >>> create_chart = Wizard('account.create_chart')
-    >>> create_chart.execute('account')
-    >>> create_chart.form.account_template = account_template
-    >>> create_chart.form.company = company
-    >>> create_chart.execute('create_account')
-    >>> receivable, = Account.find([
-    ...         ('kind', '=', 'receivable'),
-    ...         ('company', '=', company.id),
-    ...         ])
-    >>> payable, = Account.find([
-    ...         ('kind', '=', 'payable'),
-    ...         ('company', '=', company.id),
-    ...         ])
-    >>> revenue, = Account.find([
-    ...         ('kind', '=', 'revenue'),
-    ...         ('company', '=', company.id),
-    ...         ])
-    >>> expense, = Account.find([
-    ...         ('kind', '=', 'expense'),
-    ...         ('company', '=', company.id),
-    ...         ])
-    >>> create_chart.form.account_receivable = receivable
-    >>> create_chart.form.account_payable = payable
-    >>> create_chart.execute('create_properties')
-    >>> cash, = Account.find([
-    ...         ('kind', '=', 'other'),
-    ...         ('name', '=', 'Main Cash'),
-    ...         ('company', '=', company.id),
-    ...         ])
     >>> cash_journal, = Journal.find([('type', '=', 'cash')])
-    >>> cash_journal.credit_account = cash
-    >>> cash_journal.debit_account = cash
+    >>> cash_journal.credit_account = account_cash
+    >>> cash_journal.debit_account = account_cash
     >>> cash_journal.save()
 
 Create parties::
@@ -133,12 +82,6 @@ Create parties::
     >>> Party = Model.get('party.party')
     >>> customer = Party(name='Customer')
     >>> customer.save()
-
-Create category::
-
-    >>> ProductCategory = Model.get('product.category')
-    >>> category = ProductCategory(name='Category')
-    >>> category.save()
 
 Create product::
 
@@ -149,7 +92,6 @@ Create product::
     >>> product = Product()
     >>> template = ProductTemplate()
     >>> template.name = 'product'
-    >>> template.category = category
     >>> template.default_uom = unit
     >>> template.type = 'goods'
     >>> template.purchasable = True
@@ -180,11 +122,7 @@ Create product::
 
 Create payment term::
 
-    >>> PaymentTerm = Model.get('account.invoice.payment_term')
-    >>> PaymentTermLine = Model.get('account.invoice.payment_term.line')
-    >>> payment_term = PaymentTerm(name='Direct')
-    >>> payment_term_line = PaymentTermLine(type='remainder', days=0)
-    >>> payment_term.lines.append(payment_term_line)
+    >>> payment_term = create_payment_term()
     >>> payment_term.save()
 
 Create a sale selling 2 products::
