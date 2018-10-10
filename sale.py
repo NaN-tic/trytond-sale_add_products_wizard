@@ -82,7 +82,6 @@ class AddProducts(Wizard):
         for sale in sales:
             for product in products:
                 line = SaleLine()
-                line.sale = sale
                 line.type = 'line'
                 line.product = product
                 line.quantity = 0
@@ -95,7 +94,7 @@ class AddProducts(Wizard):
                             setattr(line, fname, default_fname())
                         else:
                             setattr(line, fname, None)
-
+                line.sale = sale
                 line.on_change_product()
                 to_create.append(line)
         if to_create:
