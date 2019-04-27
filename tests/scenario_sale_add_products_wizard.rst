@@ -22,7 +22,6 @@ Create database::
 
     >>> config = activate_modules('sale_add_products_wizard')
 
-
 Create company::
 
     >>> _ = create_company()
@@ -77,6 +76,15 @@ Create parties::
     >>> customer = Party(name='Customer')
     >>> customer.save()
 
+Create account category::
+
+    >>> ProductCategory = Model.get('product.category')
+    >>> account_category = ProductCategory(name="Account Category")
+    >>> account_category.accounting = True
+    >>> account_category.account_expense = expense
+    >>> account_category.account_revenue = revenue
+    >>> account_category.save()
+
 Create product::
 
     >>> ProductUom = Model.get('product.uom')
@@ -93,11 +101,9 @@ Create product::
     >>> template.list_price = Decimal('10')
     >>> template.cost_price = Decimal('5')
     >>> template.cost_price_method = 'fixed'
-    >>> template.account_expense = expense
-    >>> template.account_revenue = revenue
+    >>> template.account_category = account_category
     >>> template.save()
-    >>> product.template = template
-    >>> product.save()
+    >>> product, = template.products
 
     >>> service = Product()
     >>> template = ProductTemplate()
@@ -108,11 +114,9 @@ Create product::
     >>> template.list_price = Decimal('30')
     >>> template.cost_price = Decimal('10')
     >>> template.cost_price_method = 'fixed'
-    >>> template.account_expense = expense
-    >>> template.account_revenue = revenue
+    >>> template.account_category = account_category
     >>> template.save()
-    >>> service.template = template
-    >>> service.save()
+    >>> service, = template.products
 
 Create payment term::
 
@@ -153,8 +157,8 @@ Add product and service products to both sales::
 
     >>> add_products = Wizard('sale.add_products',
     ...     [sale_product, sale_service])
-    >>> add_products.form.products.append(product)
-    >>> add_products.form.products.append(service)
+    >>> add_products.form.products.append(Product(product.id))
+    >>> add_products.form.products.append(Product(service.id))
     >>> add_products.execute('add_products')
 
 Check draft sale has two new lines::

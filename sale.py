@@ -19,16 +19,10 @@ class AddProductsSelectProducts(ModelView):
         help="The sales that won't be changed because they are not in a state "
         "that allows it.")
     products = fields.Many2Many('product.product', None, None, 'Products',
+        domain=[('salable', '=', True)],
         states={
             'readonly': Eval('selected_sales', 0) == 0,
             }, depends=['selected_sales'])
-
-    @classmethod
-    def __setup__(cls):
-        pool = Pool()
-        SaleLine = pool.get('sale.line')
-        super(AddProductsSelectProducts, cls).__setup__()
-        cls.products.domain = SaleLine.product.domain
 
 
 class AddProducts(Wizard):
