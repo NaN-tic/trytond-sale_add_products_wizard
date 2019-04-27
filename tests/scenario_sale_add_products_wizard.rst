@@ -147,7 +147,7 @@ Confirm product sale::
 
     >>> Sale.quote([sale_product.id], config.context)
     >>> sale_product.state
-    u'quotation'
+    'quotation'
 
 Add product and service products to both sales::
 
@@ -163,11 +163,11 @@ Check draft sale has two new lines::
     >>> len(sale_service.lines)
     3
     >>> sale_service.lines[1].product.template.name
-    u'product'
+    'product'
     >>> sale_service.lines[1].quantity
     0.0
     >>> sale_service.lines[2].product.template.name
-    u'service'
+    'service'
     >>> sale_service.lines[2].quantity
     0.0
 
@@ -177,6 +177,6 @@ Check quoted sale has not been changed::
     >>> len(sale_product.lines)
     1
     >>> sale_product.lines[0].product.template.name
-    u'product'
+    'product'
     >>> sale_product.lines[0].quantity
     2.0
