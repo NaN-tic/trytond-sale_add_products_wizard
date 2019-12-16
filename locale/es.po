@@ -48,4 +48,4 @@ msgstr "Añadir"
 
 msgctxt "wizard_button:sale.add_products,select_products,end:"
 msgid "Cancel"
-msgstr "Cancel·lar"
+msgstr "Cancelar"
