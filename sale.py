@@ -22,7 +22,7 @@ class AddProductsSelectProducts(ModelView):
         domain=[('salable', '=', True)],
         states={
             'readonly': Eval('selected_sales', 0) == 0,
-            }, depends=['selected_sales'])
+            })
 
 
 class AddProducts(Wizard):
